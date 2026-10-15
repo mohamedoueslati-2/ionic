@@ -3,14 +3,15 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Ces identifiants relient l'application Web à notre projet Firebase.
+// Vite lit ces identifiants dans le fichier .env à la racine du projet.
+// Le préfixe VITE_ permet de les utiliser dans le code de l'application.
 const firebaseConfig = {
-  apiKey: "AIzaSyB6fOqWWjF8_m07W3GgRGudEbnCMwa8Xns",
-  authDomain: "moviematch-de147.firebaseapp.com",
-  projectId: "moviematch-de147",
-  storageBucket: "moviematch-de147.firebasestorage.app",
-  messagingSenderId: "1069589137414",
-  appId: "1:1069589137414:web:9c4435b0d9f281e8011b87"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialise Firebase une fois ; les autres fichiers réutilisent les exports ci-dessous.
