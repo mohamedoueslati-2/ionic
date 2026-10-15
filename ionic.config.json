@@ -1,0 +1,7 @@
+{
+  "name": "moviewatch",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
