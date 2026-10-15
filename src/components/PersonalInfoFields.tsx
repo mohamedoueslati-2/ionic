@@ -8,7 +8,7 @@ interface Props {
   disabled: boolean;
 }
 
-// Champs réutilisés par Signup et CompleteProfile pour éviter de les écrire deux fois.
+// Champs partagés par Signup, CompleteProfile et la modification du profil.
 // « ...value » conserve les autres champs lorsqu'un seul champ change.
 const PersonalInfoFields = ({ value, onChange, disabled }: Props) => (
   <>

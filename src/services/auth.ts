@@ -1,9 +1,16 @@
 import {
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
+  linkWithCredential,
+  reauthenticateWithCredential,
+  reauthenticateWithPopup,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updatePassword,
 } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../config/firebase';
 import type { PersonalInfo, SignupInfo } from '../types/auth';
@@ -27,7 +34,66 @@ function validatePersonalInfo(info: PersonalInfo) {
 
 // Connexion à un compte existant avec l'email et le mot de passe.
 export async function login(email: string, password: string) {
-  await signInWithEmailAndPassword(auth, email, password);
+  const { user } = await signInWithEmailAndPassword(auth, email, password);
+  // Garde la copie de l'email du profil cohérente avec Firebase Authentication.
+  await syncAccountEmail(user);
+}
+
+// Firebase envoie un lien de réinitialisation ; aucun mot de passe n'est stocké ici.
+export async function requestPasswordReset(email: string) {
+  if (!email.trim()) throw new Error('Please enter your email address');
+  try {
+    await sendPasswordResetEmail(auth, email.trim());
+  } catch (err) {
+    // La réponse reste identique si l'adresse n'existe pas.
+    if (typeof err === 'object' && err !== null && 'code' in err && err.code === 'auth/user-not-found') return;
+    throw err;
+  }
+}
+
+// Récupère le compte connecté ; son email reste inchangé pendant ces opérations.
+function requireAccount() {
+  const user = auth.currentUser;
+  if (!user || !user.email) throw new Error('Please sign in again');
+  return user;
+}
+
+// Confirme l'identité avec le mot de passe MovieMatch existant ou avec Google.
+async function confirmAccount(currentPassword: string) {
+  const user = requireAccount();
+  if (user.providerData.some((provider) => provider.providerId === 'password')) {
+    if (!currentPassword) throw new Error('Please enter your current password');
+    const credential = EmailAuthProvider.credential(user.email!, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+  } else if (user.providerData.some((provider) => provider.providerId === 'google.com')) {
+    await reauthenticateWithPopup(user, googleProvider);
+  } else {
+    throw new Error('This sign-in method cannot update a MovieMatch password');
+  }
+  if (auth.currentUser?.uid !== user.uid) throw new Error('Please sign in again');
+  return user;
+}
+
+export async function changeAccountPassword(currentPassword: string, newPassword: string) {
+  if (newPassword.length < 6) throw new Error('Password must contain at least 6 characters');
+  const user = await confirmAccount(currentPassword);
+  if (user.providerData.some((provider) => provider.providerId === 'password')) {
+    await updatePassword(user, newPassword);
+  } else {
+    // Ajoute une connexion email/mot de passe au même compte Google, sans changer son uid.
+    const credential = EmailAuthProvider.credential(user.email!, newPassword);
+    await linkWithCredential(user, credential);
+  }
+}
+
+// Firebase Auth reste la source de l'email affiché ; les formulaires ne le modifient pas.
+async function syncAccountEmail(user: User) {
+  if (auth.currentUser?.uid !== user.uid) throw new Error('Please sign in again');
+  const ref = doc(db, 'users', user.uid);
+  const snapshot = await getDoc(ref);
+  if (snapshot.exists() && snapshot.data().email !== user.email) {
+    await updateDoc(ref, { email: user.email });
+  }
 }
 
 // Inscription par email : vérifie d'abord les informations obligatoires.
@@ -73,6 +139,19 @@ export async function completeProfile(uid: string, info: PersonalInfo) {
   await updateDoc(doc(db, 'users', uid), {
     ...validatePersonalInfo(info),
     profileCompleted: true,
+  });
+}
+
+// Modifie uniquement les informations personnelles du compte connecté.
+export async function updateProfileDetails(uid: string, info: PersonalInfo) {
+  if (auth.currentUser?.uid !== uid) {
+    throw new Error('Unauthorized');
+  }
+
+  // Réutilise les mêmes règles que l'inscription, sans modifier le rôle ni le statut.
+  await updateDoc(doc(db, 'users', uid), {
+    ...validatePersonalInfo(info),
+    updatedAt: serverTimestamp(),
   });
 }
 

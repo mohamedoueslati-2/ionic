@@ -18,6 +18,7 @@ export interface UserProfile {
   age?: number | null;
   photoURL?: string;
   status?: string;
+  role?: string; // Rôle du compte affiché en lecture seule dans Profile.
   profileCompleted?: boolean; // App affiche Home uniquement si cette valeur est vraie.
 }
 
@@ -25,4 +26,14 @@ export interface UserProfile {
 export interface ActionProps {
   busy: boolean;
   error?: string; // Message affiché par la structure Ionic de la page.
+}
+
+// Informations de connexion affichées séparément des données personnelles Firestore.
+export interface AccountDetails {
+  email: string | null;
+  providerIds: string[];
+}
+
+export interface AccountSecurityProps extends ActionProps, AccountDetails {
+  onChangePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
 }
