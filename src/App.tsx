@@ -92,7 +92,7 @@ const App = () => {
   } else if (profile?.profileCompleted) {
     // Utilisateur connecté avec profil complet : accès à l'accueil.
     content = <Home key={user.uid} busy={busy} error={error} email={user.email} initialPhotoURL={profile.photoURL ?? ''}
-      onSavePhoto={(photoURL) => void run(() => authService.savePhoto(user.uid, photoURL))} onLogout={onLogout} />;
+      onSavePhoto={(file) => void run(() => authService.uploadProfilePhoto(user.uid, file))} onLogout={onLogout} />;
   } else {
     // Profil absent ou incomplet : demande les informations obligatoires.
     // C'est notamment l'étape qui suit une première inscription avec Google.

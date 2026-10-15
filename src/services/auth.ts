@@ -76,9 +76,37 @@ export async function completeProfile(uid: string, info: PersonalInfo) {
   });
 }
 
-// Enregistre seulement l'adresse de la photo ; aucun fichier image n'est envoyé ici.
-export async function savePhoto(uid: string, photoURL: string) {
-  await updateDoc(doc(db, 'users', uid), { photoURL: photoURL.trim() });
+// Vérifie le compte connecté et le fichier avant de téléverser la photo vers Cloudinary.
+export async function uploadProfilePhoto(uid: string, file: File) {
+  if (auth.currentUser?.uid !== uid) {
+    throw new Error('Unauthorized');
+  }
+
+  const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!allowed.includes(file.type)) {
+    throw new Error('Only JPG, PNG and WEBP are allowed');
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('Maximum file size is 5 MB');
+  }
+
+  // Envoie le fichier et le nom du preset Cloudinary sous forme de données multipart.
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', 'moviematch_profiles');
+
+  const response = await fetch('https://api.cloudinary.com/v1_1/lzdqtrpf/image/upload', {
+    method: 'POST',
+    body: formData,
+  });
+  const result = await response.json();
+
+  if (!response.ok || !result.secure_url) {
+    throw new Error(result.error?.message || 'Upload failed');
+  }
+
+  // Firestore conserve l'URL HTTPS ; le fichier image reste hébergé chez Cloudinary.
+  await updateDoc(doc(db, 'users', uid), { photoURL: result.secure_url });
 }
 
 // Ferme la session ; useAuth détecte la déconnexion et App affiche Login.
