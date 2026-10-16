@@ -130,6 +130,7 @@ ion-button[fill='outline'] { --border-color: var(--app-border); --color: var(--a
 ion-button[fill='clear'] { --color: var(--app-accent); }
 ion-button[color='danger'] { --color: var(--ion-color-danger); --border-color: var(--ion-color-danger); }
 ion-button.button-disabled { opacity: .5; }
+ion-button.button-solid:not(.ion-color):not(.movie-favorite-button) { --background: var(--ion-color-primary-shade); --background-hover: var(--ion-color-primary-shade); }
 ion-card { border: 1px solid var(--app-border); border-radius: var(--app-radius); box-shadow: var(--app-shadow); color: var(--app-muted); }
 ion-card-title { color: var(--app-text); font-size: 1.15rem; font-weight: 650; letter-spacing: -.02em; }
 ion-card-header { padding: 24px 24px 16px; }
@@ -139,9 +140,9 @@ ion-item { --color: var(--app-text); --border-color: var(--app-border); --min-he
 ion-item ion-label p { color: var(--app-muted); }
 ion-input { --highlight-color-focused: var(--ion-color-primary); --placeholder-opacity: 1; font-size: 15px; }
 ion-input::part(label) { color: var(--app-muted); }
-ion-searchbar { --background: var(--app-surface); --color: var(--app-text); --placeholder-color: var(--app-muted); --icon-color: var(--app-muted); --clear-button-color: var(--app-muted); --border-radius: 12px; --box-shadow: none; padding: 0 !important; min-width: 0; }
+.app-page ion-searchbar, .auth-page ion-searchbar { --background: var(--app-surface); --color: var(--app-text); --placeholder-color: var(--app-muted); --icon-color: var(--app-muted); --clear-button-color: var(--app-muted); --border-radius: 12px; --box-shadow: none; padding: 0 !important; min-width: 0; }
 ion-searchbar .searchbar-input-container { min-height: 52px; }
-ion-searchbar .searchbar-input { border: 1px solid var(--app-border) !important; }
+.app-page ion-searchbar .searchbar-input, .auth-page ion-searchbar .searchbar-input { border-radius: 12px; border: 1px solid var(--app-border) !important; }
 ion-searchbar.searchbar-has-focus .searchbar-input { border-color: var(--app-accent) !important; }
 ion-badge { border-radius: 8px; padding: 6px 10px; font-weight: 600; }
 ion-spinner { color: var(--ion-color-primary); }
@@ -156,7 +157,7 @@ ion-tab-button.tab-selected { background: var(--app-accent-soft); }
 .brand-accent { color: var(--app-accent); }
 .admin-label { color: var(--app-muted); font-size: 10px; letter-spacing: .1em; border: 1px solid var(--app-border); border-radius: 6px; padding: 5px; }
 .app-header .theme-toggle, .app-header .profile-shortcut { width: 44px; height: 44px; --border-radius: 50%; --color: var(--app-muted); }
-.app-header .profile-shortcut { background: var(--app-accent-soft); --color: var(--app-accent); margin-left: 8px; }
+.app-header .profile-shortcut { background: var(--app-accent-soft); border-radius: 50%; --color: var(--app-accent); margin-left: 8px; }
 .page-shell { width: 100%; max-width: 800px; margin: 0 auto; padding: 40px 24px max(40px, env(safe-area-inset-bottom)); }
 .page-shell-wide { max-width: 1280px; }
 .section-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 32px; }

@@ -18,7 +18,7 @@ export default function Login({ busy, error, onLogin, onRequestPasswordReset, on
   const [resetEmail, setResetEmail] = useState('');
   const [resetSent, setResetSent] = useState(false);
 
-  if (resetMode) return <AuthLayout title="Forgot your password?" subtitle="It happens. We'll help you get back to your next great film." icon={mailOutline} busy={busy} error={error}>
+  if (resetMode) return <AuthLayout key="reset" title="Forgot your password?" subtitle="It happens. We'll help you get back to your next great film." icon={mailOutline} busy={busy} error={error}>
     <form onSubmit={(event) => {
       event.preventDefault();
       if (busy) return;
@@ -33,7 +33,7 @@ export default function Login({ busy, error, onLogin, onRequestPasswordReset, on
     <IonButton expand="block" fill="clear" disabled={busy} onClick={() => setResetMode(false)}><IonIcon slot="start" icon={arrowBackOutline} aria-hidden="true" />Back to Login</IonButton>
   </AuthLayout>;
 
-  return <AuthLayout title="Welcome back" subtitle="Your next favorite film is just around the corner." busy={busy} error={error}>
+  return <AuthLayout key="login" title="Welcome back" subtitle="Your next favorite film is just around the corner." busy={busy} error={error}>
     <form onSubmit={(event) => { event.preventDefault(); if (!busy) onLogin(email, password); }}>
       <IonList>
         <IonItem lines="none"><IonInput label="Email address" labelPlacement="stacked" placeholder="you@example.com" name="email" type="email" autocomplete="email"
