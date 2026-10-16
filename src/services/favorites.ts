@@ -80,7 +80,7 @@ export async function removeFavorite(movieId: number): Promise<void> {
 }
 
 export function subscribeFavorites(
-  callback: (favorites: FavoriteMovie[]) => void,
+  callback: (favorites: FavoriteMovie[], ready?: boolean) => void,
   onError: (error: Error) => void,
 ): () => void {
   let disposed = false;
@@ -92,7 +92,7 @@ export function subscribeFavorites(
     const currentGeneration = ++generation;
     stopFavorites?.();
     stopFavorites = undefined;
-    if (currentGeneration > 1 || !user) callback([]);
+    if (currentGeneration > 1 || !user) callback([], false);
     if (!user) {
       onError(new Error('Please sign in to use Favorites.'));
       return;
@@ -102,13 +102,14 @@ export function subscribeFavorites(
     void requireFavoriteAccount().then((uid) => {
       if (!isCurrent() || uid !== user.uid) return;
       const favoritesQuery = query(collection(db, 'users', uid, 'favorites'), orderBy('addedAt', 'desc'));
-      stopFavorites = onSnapshot(favoritesQuery, (snapshot) => {
+      stopFavorites = onSnapshot(favoritesQuery, { includeMetadataChanges: true }, (snapshot) => {
         if (!isCurrent()) return;
         // Estimates keep a pending server timestamp usable until the server acknowledges it.
-        callback(snapshot.docs.map((favorite) => favorite.data({ serverTimestamps: 'estimate' }) as FavoriteMovie));
+        callback(snapshot.docs.map((favorite) => favorite.data({ serverTimestamps: 'estimate' }) as FavoriteMovie),
+          !snapshot.metadata.fromCache && !snapshot.metadata.hasPendingWrites);
       }, (error) => {
         if (!isCurrent()) return;
-        callback([]);
+        callback([], false);
         onError(error);
       });
     }).catch((error: Error) => {
@@ -119,7 +120,7 @@ export function subscribeFavorites(
     ++generation;
     stopFavorites?.();
     stopFavorites = undefined;
-    callback([]);
+    callback([], false);
     onError(error);
   });
 

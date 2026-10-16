@@ -36,6 +36,7 @@ describe('Role tab navigation', () => {
     ['USER', '/tabs/matching', '/tabs/matching', 'Matching test page'],
     ['USER', '/tabs/favorites', '/tabs/favorites', 'Favorites test page'],
     ['ADMIN', '/tabs/favorites', '/tabs/dashboard', 'Dashboard test page'],
+    ['ADMIN', '/tabs/matching', '/tabs/dashboard', 'Dashboard test page'],
     ['ADMIN', '/tabs/profile', '/tabs/profile', 'Profile test page'],
   ])('%s at %s renders %s', async (role, path, destination, title) => {
     const view = mount(role, path);
@@ -66,6 +67,13 @@ describe('Role tab navigation', () => {
     await waitFor(() => expect(window.location.pathname).toBe('/tabs/home'));
     expect(view.queryByText('Favorites test page')).toBeNull();
     expect(view.container.querySelector('ion-tab-button[tab="favorites"]')).toBeNull();
+    expect(view.container.querySelector('ion-tab-button[tab="matching"]')).toBeNull();
+    expect(subscribeFavorites).not.toHaveBeenCalled();
+  });
+  it.each([{ status: 'DISABLED' }, { profileCompleted: false }])('blocks Matching for an ineligible USER profile: %j', async (profile) => {
+    const view = mount('USER', '/tabs/matching', profile);
+    await waitFor(() => expect(window.location.pathname).toBe('/tabs/home'));
+    expect(view.queryByText('Matching test page')).toBeNull();
     expect(subscribeFavorites).not.toHaveBeenCalled();
   });
   it.each(['USER', 'ADMIN'])('%s can switch to Profile and return', async (role) => {

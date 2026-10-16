@@ -24,5 +24,6 @@ export async function setUserStatus(uid: string, status: 'ACTIVE' | 'DISABLED') 
     if (admin.data()?.role !== 'ADMIN' || admin.data()?.status !== 'ACTIVE') throw new Error('Unauthorized');
     if (!target.exists() || target.data().role !== 'USER') throw new Error('User account not found');
     transaction.update(targetRef, { status, updatedAt: serverTimestamp() });
+    if (status === 'DISABLED') transaction.delete(doc(db, 'matchingProfiles', uid));
   });
 }

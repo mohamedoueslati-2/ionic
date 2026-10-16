@@ -164,8 +164,8 @@ describe('Favorite subscription lifecycle', () => {
   async function flush() { await new Promise<void>((resolve) => setTimeout(resolve, 0)); }
 
   function emit(index: number, movies: unknown[]) {
-    const next = vi.mocked(onSnapshot).mock.calls[index][1] as (snapshot: unknown) => void;
-    next({ docs: movies.map((data) => ({ data: () => data })) });
+    const next = vi.mocked(onSnapshot).mock.calls[index][2] as unknown as (snapshot: unknown) => void;
+    next({ docs: movies.map((data) => ({ data: () => data })), metadata: { fromCache: false, hasPendingWrites: false } });
   }
 
   it('waits for the first snapshot, scopes the query, orders newest first, and unsubscribes', async () => {
@@ -174,9 +174,9 @@ describe('Favorite subscription lifecycle', () => {
     await flush();
     expect(listener.callback).not.toHaveBeenCalled();
     expect(orderBy).toHaveBeenCalledWith('addedAt', 'desc');
-    expect(onSnapshot).toHaveBeenCalledWith({ path: 'users/user-1/favorites', order: { field: 'addedAt', direction: 'desc' } }, expect.any(Function), expect.any(Function));
+    expect(onSnapshot).toHaveBeenCalledWith({ path: 'users/user-1/favorites', order: { field: 'addedAt', direction: 'desc' } }, { includeMetadataChanges: true }, expect.any(Function), expect.any(Function));
     emit(0, [{ movieId: 42 }]);
-    expect(listener.callback).toHaveBeenLastCalledWith([{ movieId: 42 }]);
+    expect(listener.callback).toHaveBeenLastCalledWith([{ movieId: 42 }], true);
     listener.stop();
     expect(listener.stopSnapshot).toHaveBeenCalledOnce();
     expect(listener.stopAuth).toHaveBeenCalledOnce();
@@ -188,12 +188,12 @@ describe('Favorite subscription lifecycle', () => {
     await flush();
     listener.changeAccount('user-2');
     expect(listener.stopSnapshot).toHaveBeenCalledOnce();
-    expect(listener.callback).toHaveBeenLastCalledWith([]);
+    expect(listener.callback).toHaveBeenLastCalledWith([], false);
     emit(0, [{ movieId: 99 }]);
-    expect(listener.callback).toHaveBeenLastCalledWith([]);
+    expect(listener.callback).toHaveBeenLastCalledWith([], false);
     await flush();
     emit(1, [{ movieId: 42 }]);
-    expect(listener.callback).toHaveBeenLastCalledWith([{ movieId: 42 }]);
+    expect(listener.callback).toHaveBeenLastCalledWith([{ movieId: 42 }], true);
     listener.stop();
   });
 
@@ -203,7 +203,7 @@ describe('Favorite subscription lifecycle', () => {
     await flush();
     listener.changeAccount(null);
     expect(listener.stopSnapshot).toHaveBeenCalledOnce();
-    expect(listener.callback).toHaveBeenLastCalledWith([]);
+    expect(listener.callback).toHaveBeenLastCalledWith([], false);
     expect(listener.onError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('sign in') }));
     listener.stop();
   });
@@ -230,11 +230,25 @@ describe('Favorite subscription lifecycle', () => {
     const listener = listen();
     listener.changeAccount('user-1');
     await flush();
-    const fail = vi.mocked(onSnapshot).mock.calls[0][2] as unknown as (error: Error) => void;
+    const fail = vi.mocked(onSnapshot).mock.calls[0][3] as unknown as (error: Error) => void;
     const error = new Error('permission-denied');
     fail(error);
-    expect(listener.callback).toHaveBeenLastCalledWith([]);
+    expect(listener.callback).toHaveBeenLastCalledWith([], false);
     expect(listener.onError).toHaveBeenLastCalledWith(error);
+    listener.stop();
+  });
+
+  it('marks cached and pending snapshots unsafe for matching, including empty cache snapshots', async () => {
+    const listener = listen();
+    listener.changeAccount('user-1');
+    await flush();
+    const next = vi.mocked(onSnapshot).mock.calls[0][2] as unknown as (snapshot: unknown) => void;
+    next({ docs: [], metadata: { fromCache: true, hasPendingWrites: false } });
+    expect(listener.callback).toHaveBeenLastCalledWith([], false);
+    next({ docs: [], metadata: { fromCache: false, hasPendingWrites: true } });
+    expect(listener.callback).toHaveBeenLastCalledWith([], false);
+    next({ docs: [], metadata: { fromCache: false, hasPendingWrites: false } });
+    expect(listener.callback).toHaveBeenLastCalledWith([], true);
     listener.stop();
   });
 });

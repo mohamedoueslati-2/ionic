@@ -12,14 +12,18 @@ interface Props {
 }
 
 export default function FavoritesProvider({ uid, enabled, children }: Props) {
-  const [favorites, setFavorites] = useState<FavoriteMovie[]>([]);
-  const [loading, setLoading] = useState(enabled);
-  const [listenerError, setListenerError] = useState('');
+  const [snapshot, setSnapshot] = useState({ uid, enabled, revision: 0, favorites: [] as FavoriteMovie[], loading: enabled, ready: false, error: '' });
   const [operationError, setOperationError] = useState('');
   const [revision, setRevision] = useState(0);
   const [pendingIds, setPendingIds] = useState<ReadonlySet<number>>(new Set());
   const pending = useRef(new Set<number>());
   const mounted = useRef(false);
+  const generation = useRef(0);
+  const currentSnapshot = snapshot.uid === uid && snapshot.enabled === enabled && snapshot.revision === revision;
+  const favorites = currentSnapshot ? snapshot.favorites : [];
+  const loading = enabled && (!currentSnapshot || snapshot.loading);
+  const listenerError = currentSnapshot ? snapshot.error : '';
+  const ready = enabled && currentSnapshot && snapshot.ready && !listenerError;
 
   useEffect(() => {
     mounted.current = true;
@@ -27,22 +31,20 @@ export default function FavoritesProvider({ uid, enabled, children }: Props) {
   }, []);
 
   useEffect(() => {
-    setFavorites([]);
-    setListenerError('');
+    ++generation.current;
+    setSnapshot({ uid, enabled, revision, favorites: [], loading: enabled, ready: false, error: '' });
+    pending.current = new Set();
+    setPendingIds(new Set());
     setOperationError('');
-    setLoading(enabled);
     if (!enabled) return;
 
     let current = true;
-    const stop = favoritesService.subscribeFavorites((movies) => {
+    const stop = favoritesService.subscribeFavorites((movies, confirmed = true) => {
       if (!current || auth.currentUser?.uid !== uid) return;
-      setFavorites(movies);
-      setLoading(false);
+      setSnapshot((previous) => ({ uid, enabled, revision, favorites: movies, loading: !confirmed && previous.loading, ready: confirmed, error: '' }));
     }, (error) => {
       if (!current || auth.currentUser?.uid !== uid) return;
-      setFavorites([]);
-      setLoading(false);
-      setListenerError(`Unable to load Favorites. ${error.message}`);
+      setSnapshot({ uid, enabled, revision, favorites: [], loading: false, ready: false, error: `Unable to load Favorites. ${error.message}` });
     });
     return () => {
       current = false;
@@ -53,18 +55,21 @@ export default function FavoritesProvider({ uid, enabled, children }: Props) {
   async function run(movieId: number, action: () => Promise<void>) {
     // The ref locks immediately, including two clicks before React renders again.
     if (!enabled || loading || listenerError || auth.currentUser?.uid !== uid || pending.current.has(movieId)) return;
+    const currentGeneration = generation.current;
     pending.current.add(movieId);
     setPendingIds(new Set(pending.current));
     setOperationError('');
     try {
       await action();
     } catch (error) {
-      if (mounted.current && auth.currentUser?.uid === uid) {
+      if (mounted.current && generation.current === currentGeneration && auth.currentUser?.uid === uid) {
         setOperationError(`Unable to update Favorites. ${error instanceof Error ? error.message : 'Please try again.'}`);
       }
     } finally {
-      pending.current.delete(movieId);
-      if (mounted.current && auth.currentUser?.uid === uid) setPendingIds(new Set(pending.current));
+      if (mounted.current && generation.current === currentGeneration && auth.currentUser?.uid === uid) {
+        pending.current.delete(movieId);
+        setPendingIds(new Set(pending.current));
+      }
     }
   }
 
@@ -79,6 +84,7 @@ export default function FavoritesProvider({ uid, enabled, children }: Props) {
       enabled,
       favorites: enabled ? favorites : [],
       loading: enabled && loading,
+      ready,
       error: enabled ? listenerError || operationError : '',
       pendingIds,
       unavailable: !enabled || loading || Boolean(listenerError),

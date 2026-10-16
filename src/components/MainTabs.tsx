@@ -16,6 +16,7 @@ import Matching from '../pages/Matching';
 import Profile from '../pages/Profile';
 import type { AccountSecurityProps, PersonalInfo, UserProfile } from '../types/auth';
 import FavoritesProvider from './FavoritesProvider';
+import MatchingProfileSync from './MatchingProfileSync';
 
 // Les actions du profil sont transmises depuis App, qui conserve la logique Firebase.
 interface Props extends AccountSecurityProps {
@@ -32,6 +33,7 @@ function TabsContent(props: Props) {
   const defaultTab = isAdmin ? 'dashboard' : 'home';
   return (
     <FavoritesProvider key={props.uid} uid={props.uid} enabled={canUseFavorites}>
+      <MatchingProfileSync uid={props.uid} profile={props.profile} />
       <IonTabs>
         {/* Routes relatives : le routeur parent prend déjà en charge le préfixe /tabs. */}
         <IonRouterOutlet>
@@ -40,7 +42,7 @@ function TabsContent(props: Props) {
           ] : [
             <Route key="home" path="/tabs/home" element={<Home />} />,
             ...(canUseFavorites ? [<Route key="favorites" path="/tabs/favorites" element={<Favorites />} />] : []),
-            <Route key="matching" path="/tabs/matching" element={<Matching />} />,
+            ...(canUseFavorites ? [<Route key="matching" path="/tabs/matching" element={<Matching uid={props.uid} />} />] : []),
           ])}
           <Route path="/tabs/profile" element={<Profile {...props} />} />
           <Route path="*" element={<Navigate to={`/tabs/${defaultTab}`} replace />} />
@@ -60,10 +62,10 @@ function TabsContent(props: Props) {
               <IonIcon icon={heartOutline} aria-hidden="true" />
               <IonLabel>Favorites</IonLabel>
             </IonTabButton>] : []),
-            <IonTabButton key="matching" tab="matching" href="/tabs/matching">
+            ...(canUseFavorites ? [<IonTabButton key="matching" tab="matching" href="/tabs/matching">
               <IonIcon icon={peopleOutline} aria-hidden="true" />
               <IonLabel>Matching</IonLabel>
-            </IonTabButton>])}
+            </IonTabButton>] : [])])}
           <IonTabButton tab="profile" href="/tabs/profile">
             <IonIcon icon={personOutline} aria-hidden="true" />
             <IonLabel>Profile</IonLabel>

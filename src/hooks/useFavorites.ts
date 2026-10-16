@@ -5,6 +5,7 @@ export interface FavoritesState {
   enabled: boolean;
   favorites: FavoriteMovie[];
   loading: boolean;
+  ready: boolean; // A complete, server-confirmed snapshot, safe to publish for matching.
   error: string;
   pendingIds: ReadonlySet<number>;
   unavailable: boolean;

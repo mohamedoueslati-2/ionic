@@ -13,6 +13,7 @@ export interface SignupInfo extends PersonalInfo {
 
 // Structure du profil lu dans Firestore. « ? » indique un champ facultatif.
 export interface UserProfile {
+  email?: string | null;
   firstName?: string;
   lastName?: string;
   age?: number | null;
