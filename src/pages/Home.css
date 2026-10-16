@@ -3,6 +3,27 @@
   margin: 8px 0;
 }
 
+.movie-poster-container {
+  position: relative;
+}
+
+.movie-favorite-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  --background: rgba(255, 255, 255, 0.95);
+  --background-hover: #fff;
+  --background-activated: #fff;
+  --color: var(--ion-color-dark);
+}
+
+.movie-favorite-button.is-favorite {
+  --color: var(--ion-color-danger);
+}
+
 .movie-poster,
 .movie-poster-placeholder {
   width: 100%;

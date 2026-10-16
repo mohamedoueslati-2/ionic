@@ -93,10 +93,11 @@ const App = () => {
     // Le statut du profil empêche ici l'affichage de Home.
     content = <Disabled busy={busy} error={error} onLogout={onLogout} />;
   } else if (profile?.profileCompleted) {
-    // Utilisateur connecté avec profil complet : accès aux trois onglets Ionic.
+    // Utilisateur connecté avec profil complet : accès aux onglets de son rôle.
     content = (
       <MainTabs
         key={user.uid}
+        uid={user.uid}
         busy={busy}
         error={error}
         email={account.email}

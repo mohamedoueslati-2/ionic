@@ -25,6 +25,8 @@ import type { InfiniteScrollCustomEvent } from "@ionic/react";
 
 import "./Home.css";
 import PageLayout from "../components/PageLayout";
+import FavoriteButton from "../components/FavoriteButton";
+import { useFavorites } from "../hooks/useFavorites";
 import {
   MOVIE_COLLECTIONS,
   getGenres,
@@ -34,6 +36,8 @@ import {
 import type { Movie, Genre, MovieCollection } from "../services/tmdb";
 
 export default function Home() {
+  const favorites = useFavorites();
+  const favoriteIds = new Set(favorites.favorites.map((movie) => movie.movieId));
   const [collection, setCollection] = useState<MovieCollection>("popular");
   const [retry, setRetry] = useState(0);
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -198,7 +202,9 @@ export default function Home() {
   }
 
   return (
-    <PageLayout title="MovieMatch" wide>
+    <PageLayout title="MovieMatch" wide error={favorites.error}>
+
+      {favorites.error && <IonButton fill="outline" onClick={favorites.retry}>Retry Favorites</IonButton>}
 
       <h2>Discover Movies</h2>
 
@@ -296,14 +302,23 @@ export default function Home() {
                 sizeLg="3"
               >
                 <IonCard className="movie-card">
-                  {poster ? (
-                    <img
-                      src={poster}
-                      alt={movie.title}
-                      loading="lazy"
-                      className="movie-poster"
-                    />
-                  ) : <div className="movie-poster-placeholder">No poster available</div>}
+                  <div className="movie-poster-container">
+                    {poster ? (
+                      <img
+                        src={poster}
+                        alt={movie.title}
+                        loading="lazy"
+                        className="movie-poster"
+                      />
+                    ) : <div className="movie-poster-placeholder">No poster available</div>}
+
+                    {favorites.enabled && <FavoriteButton
+                      title={movie.title}
+                      favorite={favoriteIds.has(movie.id)}
+                      disabled={favorites.unavailable || favorites.pendingIds.has(movie.id)}
+                      onClick={() => void favorites.toggleFavorite(movie)}
+                    />}
+                  </div>
 
                   <IonCardHeader>
                     <IonCardTitle>
