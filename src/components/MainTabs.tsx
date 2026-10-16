@@ -30,30 +30,30 @@ function TabsContent(props: Props) {
     <IonTabs>
       {/* Routes relatives : le routeur parent prend déjà en charge le préfixe /tabs. */}
       <IonRouterOutlet>
-        {isAdmin ? <Route path="dashboard" element={<Dashboard />} /> : <>
-          <Route path="home" element={<Home />} />
-          <Route path="matching" element={<Matching />} />
-        </>}
-        <Route path="profile" element={<Profile {...props} />} />
-        <Route index element={<Navigate to={`/tabs/${defaultTab}`} replace />} />
+        {(isAdmin ? [
+          <Route key="dashboard" path="/tabs/dashboard" element={<Dashboard />} />,
+        ] : [
+          <Route key="home" path="/tabs/home" element={<Home />} />,
+          <Route key="matching" path="/tabs/matching" element={<Matching />} />,
+        ])}
+        <Route path="/tabs/profile" element={<Profile {...props} />} />
         <Route path="*" element={<Navigate to={`/tabs/${defaultTab}`} replace />} />
       </IonRouterOutlet>
 
       {/* Barre inférieure Ionic : chaque bouton est associé à son onglet et à son URL. */}
       <IonTabBar slot="bottom">
-        {isAdmin ? <IonTabButton tab="dashboard" href="/tabs/dashboard">
+        {(isAdmin ? [<IonTabButton key="dashboard" tab="dashboard" href="/tabs/dashboard">
           <IonIcon icon={gridOutline} aria-hidden="true" />
           <IonLabel>Dashboard</IonLabel>
-        </IonTabButton> : <>
-        <IonTabButton tab="home" href="/tabs/home">
+        </IonTabButton>] : [
+        <IonTabButton key="home" tab="home" href="/tabs/home">
           <IonIcon icon={homeOutline} aria-hidden="true" />
           <IonLabel>Home</IonLabel>
-        </IonTabButton>
-        <IonTabButton tab="matching" href="/tabs/matching">
+        </IonTabButton>,
+        <IonTabButton key="matching" tab="matching" href="/tabs/matching">
           <IonIcon icon={peopleOutline} aria-hidden="true" />
           <IonLabel>Matching</IonLabel>
-        </IonTabButton>
-        </>}
+        </IonTabButton>])}
         <IonTabButton tab="profile" href="/tabs/profile">
           <IonIcon icon={personOutline} aria-hidden="true" />
           <IonLabel>Profile</IonLabel>
@@ -67,10 +67,7 @@ function TabsContent(props: Props) {
 export default function MainTabs(props: Props) {
   return (
     <IonReactRouter>
-      <IonRouterOutlet>
-        <Route path="/tabs/*" element={<TabsContent {...props} />} />
-        <Route path="*" element={<Navigate to={props.profile.role === 'ADMIN' ? '/tabs/dashboard' : '/tabs/home'} replace />} />
-      </IonRouterOutlet>
+      <TabsContent {...props} />
     </IonReactRouter>
   );
 }
