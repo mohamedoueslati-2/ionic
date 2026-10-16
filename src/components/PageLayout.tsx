@@ -17,10 +17,11 @@ interface Props {
   busy?: boolean;
   error?: string;
   children?: ReactNode;
+  wide?: boolean;
 }
 
 // Structure Ionic commune : chaque écran possède sa page, son en-tête et son contenu.
-const PageLayout = ({ title, busy = false, error, children }: Props) => (
+const PageLayout = ({ title, busy = false, error, children, wide = false }: Props) => (
   <IonPage>
     <IonHeader>
       <IonToolbar>
@@ -33,7 +34,7 @@ const PageLayout = ({ title, busy = false, error, children }: Props) => (
       {/* La grille Ionic adapte la largeur du formulaire au téléphone et à l'ordinateur. */}
       <IonGrid fixed>
         <IonRow className="ion-justify-content-center">
-          <IonCol size="12" sizeMd="8" sizeLg="6">
+          <IonCol size="12" sizeMd={wide ? '12' : '8'} sizeLg={wide ? '12' : '6'}>
             {error && <IonText color="danger"><p role="alert">{error}</p></IonText>}
             {children}
           </IonCol>

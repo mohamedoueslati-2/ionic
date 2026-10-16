@@ -2,6 +2,7 @@
 
 // Déclare les variables Firebase disponibles via import.meta.env pour TypeScript.
 interface ImportMetaEnv {
+  readonly VITE_TMDB_READ_TOKEN?: string;
   readonly VITE_FIREBASE_API_KEY: string;
   readonly VITE_FIREBASE_AUTH_DOMAIN: string;
   readonly VITE_FIREBASE_PROJECT_ID: string;

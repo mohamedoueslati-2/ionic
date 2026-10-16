@@ -1,0 +1,32 @@
+.movie-card {
+  height: calc(100% - 16px);
+  margin: 8px 0;
+}
+
+.movie-poster,
+.movie-poster-placeholder {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  display: block;
+  background: var(--ion-color-light);
+}
+
+.movie-poster-placeholder {
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  text-align: center;
+  color: var(--ion-color-medium);
+}
+
+.movie-card ion-card-title {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.movie-credits {
+  margin-top: 24px;
+  color: var(--ion-color-medium);
+  font-size: 0.85rem;
+}
