@@ -1,16 +1,7 @@
-import type { ReactNode } from 'react';
-import {
-  IonCol,
-  IonContent,
-  IonGrid,
-  IonHeader,
-  IonPage,
-  IonProgressBar,
-  IonRow,
-  IonText,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/react';
+﻿import type { ReactNode } from 'react';
+import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonProgressBar, IonToolbar } from '@ionic/react';
+import { filmOutline, personOutline, warningOutline } from 'ionicons/icons';
+import ThemeToggle from './ThemeToggle';
 
 interface Props {
   title: string;
@@ -18,30 +9,33 @@ interface Props {
   error?: string;
   children?: ReactNode;
   wide?: boolean;
+  auth?: boolean;
+  profileShortcut?: boolean;
 }
 
-// Structure Ionic commune : chaque écran possède sa page, son en-tête et son contenu.
-const PageLayout = ({ title, busy = false, error, children, wide = false }: Props) => (
-  <IonPage>
-    <IonHeader>
+export default function PageLayout({ title, busy = false, error, children, wide = false, auth = false, profileShortcut = false }: Props) {
+  return <IonPage className={auth ? 'auth-page' : 'app-page'}>
+    <IonHeader className="app-header ion-no-border">
       <IonToolbar>
-        <IonTitle>{title}</IonTitle>
+        <div className="brand" slot="start" aria-label="MovieMatch">
+          <span className="brand-mark"><IonIcon icon={filmOutline} aria-hidden="true" /></span>
+          <span>Movie<span className="brand-accent">Match</span></span>
+          {title.includes('Admin') && <span className="admin-label">ADMIN</span>}
+        </div>
+        <IonButtons slot="end">
+          <ThemeToggle />
+          {profileShortcut && <IonButton className="profile-shortcut" routerLink="/tabs/profile" routerDirection="none" aria-label="Open your profile">
+            <IonIcon slot="icon-only" icon={personOutline} aria-hidden="true" />
+          </IonButton>}
+        </IonButtons>
       </IonToolbar>
-      {/* Indique qu'une opération Firebase est en cours. */}
       {busy && <IonProgressBar type="indeterminate" aria-label="Loading" />}
     </IonHeader>
-    <IonContent className="ion-padding">
-      {/* La grille Ionic adapte la largeur du formulaire au téléphone et à l'ordinateur. */}
-      <IonGrid fixed>
-        <IonRow className="ion-justify-content-center">
-          <IonCol size="12" sizeMd={wide ? '12' : '8'} sizeLg={wide ? '12' : '6'}>
-            {error && <IonText color="danger"><p role="alert">{error}</p></IonText>}
-            {children}
-          </IonCol>
-        </IonRow>
-      </IonGrid>
+    <IonContent>
+      <div className={`page-shell${wide ? ' page-shell-wide' : ''}${auth ? ' auth-shell' : ''}`} aria-label={title}>
+        {error && <div className="error-notice" role="alert"><IonIcon icon={warningOutline} aria-hidden="true" /><span>{error}</span></div>}
+        {children}
+      </div>
     </IonContent>
-  </IonPage>
-);
-
-export default PageLayout;
+  </IonPage>;
+}

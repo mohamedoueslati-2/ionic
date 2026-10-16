@@ -13,12 +13,16 @@ import {
   IonList,
   IonText,
   IonToast,
+  IonSegment,
+  IonSegmentButton,
 } from '@ionic/react';
 import { Camera, CameraDirection } from '@capacitor/camera';
 import { cameraOutline, checkmarkOutline, imageOutline, logOutOutline, pencilOutline } from 'ionicons/icons';
 import PageLayout from '../components/PageLayout';
 import PersonalInfoFields from '../components/PersonalInfoFields';
 import AccountSecurity from '../components/AccountSecurity';
+import SectionHeader from '../components/SectionHeader';
+import { useTheme } from '../hooks/useTheme';
 import type { AccountSecurityProps, PersonalInfo, UserProfile } from '../types/auth';
 import './Profile.css';
 
@@ -31,6 +35,8 @@ interface Props extends AccountSecurityProps {
 }
 
 const Profile = ({ busy, error, email, profile, providerIds, onChangePassword, onSaveProfile, onSavePhoto, onLogout }: Props) => {
+  const { preference, setPreference } = useTheme();
+  const [failedPhoto, setFailedPhoto] = useState('');
   const [cameraError, setCameraError] = useState('');
   const [cameraBusy, setCameraBusy] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -124,12 +130,13 @@ const Profile = ({ busy, error, email, profile, providerIds, onChangePassword, o
 
   return (
     <PageLayout title="Profile" busy={locked} error={error}>
+      <SectionHeader eyebrow="YOUR MOVIEMATCH" title="Your profile" subtitle="A little about the person behind the watchlist." />
       {/* Résumé du compte : photo ou initiales, nom complet et email en lecture seule. */}
       <IonCard className="profile-card">
         <IonCardContent className="profile-summary">
           <IonAvatar className="profile-avatar">
-            {profile.photoURL ? (
-              <img src={profile.photoURL} alt="Profile" />
+            {profile.photoURL && failedPhoto !== profile.photoURL ? (
+              <img src={profile.photoURL} alt={fullName || 'Profile'} onError={() => setFailedPhoto(profile.photoURL ?? '')} referrerPolicy="no-referrer" />
             ) : (
               <span className="profile-initials" aria-label="Profile initials">{initials || '?'}</span>
             )}
@@ -147,7 +154,7 @@ const Profile = ({ busy, error, email, profile, providerIds, onChangePassword, o
               Gallery
             </IonButton>
           </div>
-          <IonText color="medium"><p>Photos are saved automatically. Adding one is optional.</p></IonText>
+          <IonText color="medium"><p className="profile-photo-hint">Make your profile feel like you.</p></IonText>
           {cameraError && <IonText color="danger"><p role="alert">{cameraError}</p></IonText>}
         </IonCardContent>
       </IonCard>
@@ -159,7 +166,7 @@ const Profile = ({ busy, error, email, profile, providerIds, onChangePassword, o
         {/* Consultation par défaut ; les champs Ionic apparaissent seulement en modification. */}
         {editing ? (
           <form onSubmit={(event) => void saveDetails(event)}>
-            <IonList>
+            <IonList className="field-list profile-edit-fields">
               <PersonalInfoFields value={draft} onChange={setDraft} disabled={locked} />
             </IonList>
             <IonCardContent>
@@ -194,6 +201,17 @@ const Profile = ({ busy, error, email, profile, providerIds, onChangePassword, o
       {/* Gestion des identifiants séparée des informations personnelles et de la photo. */}
       <AccountSecurity busy={locked} email={email} providerIds={providerIds}
         onChangePassword={onChangePassword} />
+
+      <section className="appearance-card" aria-labelledby="appearance-heading"><h2 id="appearance-heading">Appearance</h2><p>Set the mood. Choose your favorite way to watch.</p>
+        <IonSegment value={preference} onIonChange={(event) => {
+          const value = event.detail.value;
+          if (value === 'dark' || value === 'light' || value === 'system') setPreference(value);
+        }} aria-label="Color theme">
+          <IonSegmentButton value="light"><IonLabel>Light</IonLabel></IonSegmentButton>
+          <IonSegmentButton value="dark"><IonLabel>Dark</IonLabel></IonSegmentButton>
+          <IonSegmentButton value="system"><IonLabel>System</IonLabel></IonSegmentButton>
+        </IonSegment>
+      </section>
 
       <IonButton expand="block" fill="outline" color="danger" disabled={locked} onClick={onLogout}>
         <IonIcon slot="start" icon={logOutOutline} aria-hidden="true" />

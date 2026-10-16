@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   IonAvatar, IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader,
-  IonCardTitle, IonCol, IonGrid, IonIcon, IonRow, IonSpinner,
+  IonCardTitle, IonCol, IonGrid, IonIcon, IonRow, IonProgressBar,
   useIonViewWillEnter, useIonViewWillLeave,
 } from '@ionic/react';
-import { refreshOutline } from 'ionicons/icons';
+import { refreshOutline, peopleOutline, heartOutline } from 'ionicons/icons';
 import PageLayout from '../components/PageLayout';
+import SectionHeader from '../components/SectionHeader';
+import EmptyState from '../components/EmptyState';
+import LoadingState from '../components/LoadingState';
 import { auth } from '../config/firebase';
 import { useFavorites } from '../hooks/useFavorites';
 import { findMatches, subscribeMatchingProfiles, MAX_MATCHING_MOVIES, MIN_MATCHING_MOVIES, normalizeMovieIds } from '../services/matching';
@@ -71,23 +74,20 @@ export default function Matching({ uid }: { uid: string }) {
   };
 
   return (
-    <PageLayout title="Matching" wide error={error}>
-      <div className="matching-heading">
-        <div>
-          <h2>Find your movie people</h2>
-          <p>People who share 75% or more of your combined favorite movies.</p>
-        </div>
+    <PageLayout title="Movie Matches" wide error={error} profileShortcut>
+      <SectionHeader eyebrow="SHARED TASTE. REAL CONNECTIONS." title="Movie Matches" subtitle="Find your movie people through the films you both love." action={
         <IonButton fill="outline" onClick={refresh} disabled={!enabled || loading || (!error && moviesNeeded > 0)}>
           <IonIcon icon={refreshOutline} slot="start" aria-hidden="true" />
           {error ? 'Retry matches' : 'Refresh matches'}
         </IonButton>
-      </div>
+      } />
+      <div className="intro-card"><span className="state-icon"><IonIcon icon={peopleOutline} aria-hidden="true" /></span><div><h2>A shared favorite is a great beginning.</h2><p>Discover people who share 75% or more of your combined favorite movies. Your matches update automatically as your collection grows.</p></div></div>
       {!enabled && <p>Matching requires an active USER account with a completed profile.</p>}
-      {loading && <div role="status"><IonSpinner name="crescent" aria-label="Loading matches" /><p>Loading matches...</p></div>}
-      {enabled && !loading && !error && moviesNeeded > 0 && <p>Matching starts with {MIN_MATCHING_MOVIES} favorite movies. Add {moviesNeeded} more {moviesNeeded === 1 ? 'movie' : 'movies'} to discover people with similar taste.</p>}
-      {enabled && !loading && !error && canQuery && matches.length === 0 && <p>No matches at 75% or more yet. Add more favorites or refresh to check again.</p>}
+      {loading && <LoadingState label="Loading matches" />}
+      {enabled && !loading && !error && moviesNeeded > 0 && <EmptyState icon={heartOutline} title="Start with the movies you love." description={`Matching starts with ${MIN_MATCHING_MOVIES} favorite movies. Add ${moviesNeeded} more ${moviesNeeded === 1 ? 'movie' : 'movies'} to discover people with similar taste.`}><IonButton routerLink="/tabs/home" routerDirection="none">Discover Movies</IonButton></EmptyState>}
+      {enabled && !loading && !error && canQuery && matches.length === 0 && <EmptyState icon={peopleOutline} title="Your people are out there." description="No matches at 75% or more yet. Add more favorites or refresh to check again."><IonButton routerLink="/tabs/home" routerDirection="none">Explore more movies</IonButton></EmptyState>}
       {favorites.length > MAX_MATCHING_MOVIES && <p>Matching uses up to {MAX_MATCHING_MOVIES} favorites, selected by movie ID.</p>}
-      {matches.length > 0 && <p role="status">{matches.length} {matches.length === 1 ? 'match' : 'matches'} found</p>}
+      {matches.length > 0 && <p className="matching-count" role="status">{matches.length} {matches.length === 1 ? 'match' : 'matches'} found</p>}
       <IonGrid className="matching-grid">
         <IonRow>
           {matches.map((match) => (
@@ -98,8 +98,8 @@ export default function Matching({ uid }: { uid: string }) {
                   <IonCardTitle>{match.firstName} {match.lastName}</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <p className="matching-email">{match.email}</p>
                   <IonBadge color="primary">{Math.round(match.similarity)}% match</IonBadge>
+                  <IonProgressBar className="similarity-bar" value={match.similarity / 100} aria-label={`${Math.round(match.similarity)}% similarity`} />
                   <p>{match.commonMovies} {match.commonMovies === 1 ? 'favorite movie' : 'favorite movies'} in common</p>
                 </IonCardContent>
               </IonCard>

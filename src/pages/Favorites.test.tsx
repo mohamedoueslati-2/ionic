@@ -77,7 +77,7 @@ describe('Favorites playlist', () => {
     expect(view.getByAltText('Saved Movie').getAttribute('src')).toBe('https://image.tmdb.org/t/p/w342/saved.jpg');
     expect(view.getByText('2026')).toBeTruthy();
     expect(view.getByText('No poster available')).toBeTruthy();
-    expect(view.getByText('N/A')).toBeTruthy();
+    expect(view.getByText('Release date unavailable')).toBeTruthy();
     expect(getMovies).not.toHaveBeenCalled();
     expect(getGenres).not.toHaveBeenCalled();
   });

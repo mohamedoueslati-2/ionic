@@ -7,6 +7,7 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonInput,
+  IonInputPasswordToggle,
   IonItem,
   IonLabel,
   IonList,
@@ -74,21 +75,21 @@ export default function AccountSecurity({ busy, email, providerIds, onChangePass
         {canSetPassword && editing && (
           <form onSubmit={(event) => void submit(event)}>
             <IonText><h3>{hasPassword ? 'Change password' : 'Set MovieMatch password'}</h3></IonText>
-            <IonList>
+            <IonList className="field-list profile-edit-fields">
               {/* Un compte uniquement Google n'a pas encore de mot de passe MovieMatch actuel. */}
               {hasPassword && (
                 <IonItem>
                   <IonInput label="Current password" labelPlacement="stacked" name="currentPassword" type="password" autocomplete="current-password"
-                    value={currentPassword} onIonInput={(event) => setCurrentPassword(event.detail.value ?? '')} disabled={busy} required />
+                    value={currentPassword} onIonInput={(event) => setCurrentPassword(event.detail.value ?? '')} disabled={busy} required><IonInputPasswordToggle slot="end" /></IonInput>
                 </IonItem>
               )}
               <IonItem>
                 <IonInput label="New password" labelPlacement="stacked" name="newPassword" type="password" autocomplete="new-password" minlength={6}
-                  value={newPassword} onIonInput={(event) => setNewPassword(event.detail.value ?? '')} disabled={busy} required />
+                  value={newPassword} onIonInput={(event) => setNewPassword(event.detail.value ?? '')} disabled={busy} required><IonInputPasswordToggle slot="end" /></IonInput>
               </IonItem>
               <IonItem>
                 <IonInput label="Confirm new password" labelPlacement="stacked" name="confirmPassword" type="password" autocomplete="new-password" minlength={6}
-                  value={confirmation} onIonInput={(event) => setConfirmation(event.detail.value ?? '')} disabled={busy} required />
+                  value={confirmation} onIonInput={(event) => setConfirmation(event.detail.value ?? '')} disabled={busy} required><IonInputPasswordToggle slot="end" /></IonInput>
               </IonItem>
             </IonList>
             {validationError && <IonText color="danger"><p role="alert">{validationError}</p></IonText>}

@@ -1,41 +1,15 @@
-.profile-card {
-  margin: 0 0 20px;
-}
-
-.profile-summary {
-  text-align: center;
-}
-
-.profile-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 96px;
-  height: 96px;
-  margin: 8px auto 16px;
-  background: var(--ion-color-primary-tint);
-  color: var(--ion-color-primary-contrast);
-}
-
-.profile-initials {
-  font-size: 2rem;
-  font-weight: 600;
-}
-
-.profile-summary .profile-name {
-  margin: 0 0 4px;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.profile-email {
-  overflow-wrap: anywhere;
-}
-
-.profile-photo-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 16px;
-}
+﻿.profile-card { margin: 0 0 24px; }
+.profile-summary { text-align: center; padding: 32px 24px !important; }
+.profile-avatar { display: flex; align-items: center; justify-content: center; width: 112px; height: 112px; margin: 0 auto 20px; background: var(--app-accent-soft); color: var(--app-accent); border: 5px solid var(--app-accent-soft); }
+.profile-initials { font-size: 2rem; font-weight: 650; }
+.profile-summary .profile-name { margin: 0 0 6px; font-size: 1.65rem; font-weight: 700; letter-spacing: -.035em; }
+.profile-email { overflow-wrap: anywhere; }
+.profile-photo-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 20px 0 12px; }
+.profile-photo-actions ion-button { --border-color: var(--app-border); --color: var(--app-text); min-height: 44px; }
+.profile-summary .profile-photo-hint { font-size: 12px; margin: 0; }
+.profile-edit-fields { padding: 4px 24px 0; }
+.profile-card ion-card-content .profile-edit-fields { padding: 4px 0 0; }
+.profile-card ion-item:last-child { --border-width: 0; }
+.profile-card ion-label h2 { margin-top: 6px; font-size: 15px; }
+.profile-card ion-label p { font-size: 12px; }
+.profile-card ion-card-content > ion-text > p { font-size: 13px; }

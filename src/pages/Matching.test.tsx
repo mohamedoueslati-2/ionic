@@ -69,7 +69,7 @@ describe('Matching page', () => {
     const view = render(<Matching uid="self" />);
     await view.findByText('3 matches found');
     expect(Array.from(view.container.querySelectorAll('ion-card-title')).map((title) => title.textContent)).toEqual(['First Movie Fan', 'Second Movie Fan', 'Exactly75 Movie Fan']);
-    expect(view.getByText('First@example.com')).toBeTruthy();
+    expect(view.queryByText('First@example.com')).toBeNull();
     expect(view.getByText('100% match')).toBeTruthy();
     expect(view.getByText('80% match')).toBeTruthy();
     expect(view.getAllByText('4 favorite movies in common')).toHaveLength(2);

@@ -1,26 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
-    <title>Ionic App</title>
+    <title>MovieMatch — Your movies. Your people.</title>
+    <meta name="description" content="Discover your next favorite movie and connect with people who share your taste in cinema." />
+    <meta name="theme-color" content="#0B1020" />
+    <script>
+      // Apply the saved appearance before paint, including on native WebViews.
+      try {
+        var preference = localStorage.getItem('moviematch-theme');
+        var theme = preference === 'light' || (preference === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'light' : 'dark';
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#0B1020' : '#F6F7FB';
+      } catch (_) {}
+    </script>
     
     <base href="/" />
     
     <meta name="color-scheme" content="light dark" />
     <meta
       name="viewport"
-      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="viewport-fit=cover, width=device-width, initial-scale=1.0"
     />
     <meta name="format-detection" content="telephone=no" />
     <meta name="msapplication-tap-highlight" content="no" />
     
     <link rel="manifest" href="/manifest.json" />
     
-    <link rel="shortcut icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     
     <!-- add to homescreen for ios -->
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Ionic App" />
+    <meta name="apple-mobile-web-app-title" content="MovieMatch" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   </head>
   <body>

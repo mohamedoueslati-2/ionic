@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { IonApp, IonButton, IonSpinner, IonText, setupIonicReact } from '@ionic/react';
+import { IonApp, IonButton, setupIonicReact } from '@ionic/react';
 import PageLayout from './components/PageLayout';
 import { useAuth } from './hooks/useAuth';
 import * as authService from './services/auth';
@@ -8,6 +8,8 @@ import Signup from './pages/Signup';
 import CompleteProfile from './pages/CompleteProfile';
 import Disabled from './pages/Disabled';
 import MainTabs from './components/MainTabs';
+import ThemeProvider from './components/ThemeProvider';
+import LoadingState from './components/LoadingState';
 
 // Styles de base nécessaires à l'affichage des composants Ionic.
 import '@ionic/react/css/core.css';
@@ -68,8 +70,7 @@ const App = () => {
     // Attend Firebase avant de décider si l'utilisateur est connecté.
     content = (
       <PageLayout title="MovieMatch">
-        <IonSpinner name="crescent" aria-label="Loading" />
-        <IonText><p>Loading...</p></IonText>
+        <LoadingState label="Opening MovieMatch" />
       </PageLayout>
     );
   } else if (authError) {
@@ -122,7 +123,7 @@ const App = () => {
   }
 
   // IonApp est la racine Ionic ; chaque écran fournit sa propre structure PageLayout.
-  return <IonApp>{content}</IonApp>;
+  return <ThemeProvider><IonApp>{content}</IonApp></ThemeProvider>;
 };
 
 export default App;

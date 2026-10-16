@@ -1,40 +1,17 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  IonSegment,
-  IonSegmentButton,
-  IonLabel,
-  IonButton,
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonCol,
-  IonGrid,
-  IonRow,
-  IonSearchbar,
-  IonSelect,
-  IonSelectOption,
-  IonItem,
-  IonSpinner,
-  IonInfiniteScroll,
-  IonInfiniteScrollContent,
-  IonText
-} from "@ionic/react";
-
-import type { InfiniteScrollCustomEvent } from "@ionic/react";
-
-import "./Home.css";
-import PageLayout from "../components/PageLayout";
-import FavoriteButton from "../components/FavoriteButton";
-import { useFavorites } from "../hooks/useFavorites";
-import {
-  MOVIE_COLLECTIONS,
-  getGenres,
-  getMovies,
-  getPosterUrl
-} from "../services/tmdb";
-import type { Movie, Genre, MovieCollection } from "../services/tmdb";
-
+﻿import { useEffect, useRef, useState } from 'react';
+import { IonSegment, IonSegmentButton, IonLabel, IonButton, IonSearchbar, IonSelect, IonSelectOption, IonInfiniteScroll, IonInfiniteScrollContent, IonText, IonIcon } from '@ionic/react';
+import type { InfiniteScrollCustomEvent } from '@ionic/react';
+import { closeOutline, searchOutline } from 'ionicons/icons';
+import './Home.css';
+import PageLayout from '../components/PageLayout';
+import MovieCard from '../components/MovieCard';
+import MovieGrid from '../components/MovieGrid';
+import EmptyState from '../components/EmptyState';
+import LoadingState from '../components/LoadingState';
+import SectionHeader from '../components/SectionHeader';
+import { useFavorites } from '../hooks/useFavorites';
+import { MOVIE_COLLECTIONS, getGenres, getMovies } from '../services/tmdb';
+import type { Movie, Genre, MovieCollection } from '../services/tmdb';
 export default function Home() {
   const favorites = useFavorites();
   const favoriteIds = new Set(favorites.favorites.map((movie) => movie.movieId));
@@ -202,171 +179,45 @@ export default function Home() {
   }
 
   return (
-    <PageLayout title="MovieMatch" wide error={favorites.error}>
-
+    <PageLayout title="MovieMatch" wide error={favorites.error} profileShortcut>
       {favorites.error && <IonButton fill="outline" onClick={favorites.retry}>Retry Favorites</IonButton>}
-
-      <h2>Discover Movies</h2>
-
-      {/* RECHERCHE */}
-      <IonSearchbar
-        value={search}
-        placeholder="Search movies..."
-        onIonInput={(e) => setSearch(e.detail.value ?? "")}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleSearch();
-        }}
-      />
-
-      <IonButton onClick={handleSearch}>
-        Search
-      </IonButton>
-
-      <IonButton fill="outline" onClick={showPopular}>
-        Clear
-      </IonButton>
-
-      <h3>Explore Movies</h3>
-      <IonSegment scrollable
+      <SectionHeader eyebrow="A WORLD OF STORIES AWAITS" title="Discover your next favorite." subtitle="Great films. New perspectives. Find something that stays with you." />
+      <form className="movie-search" role="search" onSubmit={(event) => { event.preventDefault(); handleSearch(); }}>
+        <IonSearchbar value={search} placeholder="Search for a movie…" aria-label="Search movies"
+          onIonInput={(event) => setSearch(event.detail.value ?? '')}
+          onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleSearch(); } }} />
+        <IonButton type="submit" aria-label="Search"><IonIcon icon={searchOutline} slot="start" aria-hidden="true" /><span className="search-button-label">Search</span></IonButton>
+        <IonButton className="clear-search" fill="outline" onClick={showPopular} aria-label="Clear search and filters" title="Clear search and filters"><IonIcon icon={closeOutline} slot="start" aria-hidden="true" /><span className="clear-search-label">Clear search and filters</span></IonButton>
+      </form>
+      <IonSegment className="collection-tabs" scrollable aria-label="Movie collections"
         value={!submittedSearch && genreId === null ? collection : undefined}
         onIonChange={(event) => {
           const value = event.detail.value;
           if (MOVIE_COLLECTIONS.some((item) => item.id === value)) selectCollection(value as MovieCollection);
         }}>
-        {MOVIE_COLLECTIONS.map((item) => <IonSegmentButton key={item.id} value={item.id}>
-          <IonLabel>{item.label}</IonLabel>
-        </IonSegmentButton>)}
+        {MOVIE_COLLECTIONS.map((item) => <IonSegmentButton key={item.id} value={item.id}><IonLabel>{item.label}</IonLabel></IonSegmentButton>)}
       </IonSegment>
-
-      {/* CATEGORIES */}
-      <IonItem>
-        <IonSelect
-          label="Movie Category"
-          labelPlacement="stacked"
-          value={genreId ?? "all"}
-          onIonChange={(e) => selectGenre(e.detail.value)}
-          interface="popover"
-        >
-          <IonSelectOption value="all">
-            All Movies
-          </IonSelectOption>
-
-          {genres.map((genre) => (
-            <IonSelectOption key={genre.id} value={genre.id}>
-              {genre.name}
-            </IonSelectOption>
-          ))}
+      <div className="movie-results-heading">
+        <div><p className="eyebrow">FIND YOUR MOVIE MOOD</p><h2>{submittedSearch ? `Results for "${submittedSearch}"` : genreId !== null ? `${genres.find((genre) => genre.id === genreId)?.name ?? 'Category'} Movies` : MOVIE_COLLECTIONS.find((item) => item.id === collection)?.label}</h2></div>
+        <IonSelect className="genre-select" label="Genre" labelPlacement="start" aria-label="Movie Category" value={genreId ?? 'all'} onIonChange={(event) => selectGenre(event.detail.value)} interface="popover">
+          <IonSelectOption value="all">All Movies</IonSelectOption>
+          {genres.map((genre) => <IonSelectOption key={genre.id} value={genre.id}>{genre.name}</IonSelectOption>)}
         </IonSelect>
-      </IonItem>
-
-      {genreError && (
-        <IonText color="danger">
-          <p>Categories: {genreError}</p>
-        </IonText>
-      )}
-
-      <h3>
-        {submittedSearch
-          ? `Results for "${submittedSearch}"`
-          : genreId !== null
-          ? `${genres.find((g) => g.id === genreId)?.name ?? "Category"} Movies`
-          : MOVIE_COLLECTIONS.find((item) => item.id === collection)?.label}
-      </h3>
-
-      {/* LOADING */}
-      {loading && <IonSpinner name="crescent" />}
-
-      {/* ERREURS */}
-      {error && (
-        <IonText color="danger">
-          <p role="alert">{error}</p>
-          <IonButton fill="outline" onClick={() => setRetry((value) => value + 1)}>Retry</IonButton>
-        </IonText>
-      )}
-
-      {!loading && movies.length === 0 && !error && (
-        <p>No movies found.</p>
-      )}
-
-      {/* LISTE DE FILMS */}
-      <IonGrid>
-        <IonRow>
-          {movies.map((movie) => {
-            const poster = getPosterUrl(movie.poster_path);
-
-            return (
-              <IonCol
-                key={movie.id}
-                size="6"
-                sizeMd="4"
-                sizeLg="3"
-              >
-                <IonCard className="movie-card">
-                  <div className="movie-poster-container">
-                    {poster ? (
-                      <img
-                        src={poster}
-                        alt={movie.title}
-                        loading="lazy"
-                        className="movie-poster"
-                      />
-                    ) : <div className="movie-poster-placeholder">No poster available</div>}
-
-                    {favorites.enabled && <FavoriteButton
-                      title={movie.title}
-                      favorite={favoriteIds.has(movie.id)}
-                      disabled={favorites.unavailable || favorites.pendingIds.has(movie.id)}
-                      onClick={() => void favorites.toggleFavorite(movie)}
-                    />}
-                  </div>
-
-                  <IonCardHeader>
-                    <IonCardTitle>
-                      {movie.title}
-                    </IonCardTitle>
-
-                    <IonCardSubtitle>
-                      {movie.release_date?.slice(0, 4) || "N/A"}
-                      {" | "}
-                      ⭐ {movie.vote_average.toFixed(1)}
-                    </IonCardSubtitle>
-                  </IonCardHeader>
-                </IonCard>
-              </IonCol>
-            );
-          })}
-        </IonRow>
-      </IonGrid>
-
-      {/* INFINITE SCROLL */}
-      <IonInfiniteScroll
-        threshold="150px"
-        disabled={
-          Boolean(error) ||
-          loading ||
-          movies.length === 0 ||
-          page >= totalPages
-        }
-        onIonInfinite={(event) => void loadMore(event)}
-      >
-        <IonInfiniteScrollContent
-          loadingSpinner="bubbles"
-          loadingText="Loading more movies..."
-        />
+      </div>
+      {genreError && <IonText color="danger"><p role="alert">Categories: {genreError}</p></IonText>}
+      {loading && <LoadingState label="Loading movies" skeletons />}
+      {error && <div className="error-notice"><span role="alert">{error}</span><IonButton fill="outline" onClick={() => setRetry((value) => value + 1)}>Retry</IonButton></div>}
+      {!loading && movies.length === 0 && !error && <EmptyState title="No movies found." description="Try a different title or explore another collection."><IonButton onClick={showPopular}>Explore popular movies</IonButton></EmptyState>}
+      <MovieGrid>
+        {movies.map((movie) => <MovieCard key={movie.id} title={movie.title} posterPath={movie.poster_path} releaseDate={movie.release_date} rating={movie.vote_average}
+          favorite={favoriteIds.has(movie.id)} disabled={favorites.unavailable || favorites.pendingIds.has(movie.id)}
+          onFavorite={favorites.enabled ? () => void favorites.toggleFavorite(movie) : undefined} />)}
+      </MovieGrid>
+      <IonInfiniteScroll threshold="150px" disabled={Boolean(error) || loading || movies.length === 0 || page >= totalPages} onIonInfinite={(event) => void loadMore(event)}>
+        <IonInfiniteScrollContent loadingSpinner="bubbles" loadingText="Loading more movies…" />
       </IonInfiniteScroll>
-
-      {!loading && movies.length > 0 && (
-        <p>
-          Showing {movies.length} movies — page {page}
-          {" / "}{totalPages}
-        </p>
-      )}
-
-      <footer className="movie-credits">
-        <h3>Credits</h3>
-        <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer">The Movie Database (TMDB)</a>
-        <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
-      </footer>
+      {!loading && movies.length > 0 && <p className="movie-page-count">Showing {movies.length} movies — page {page} / {totalPages}</p>}
+      <footer className="movie-credits"><a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer">Powered by TMDB</a><p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p></footer>
     </PageLayout>
   );
 }
