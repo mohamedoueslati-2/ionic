@@ -1,10 +1,16 @@
-﻿# MovieMatch
+﻿<div align="center">
+
+# MovieMatch
 
 **Your movies. Your people.**
+
+</div>
 
 MovieMatch aide les cinéphiles à **découvrir des films, conserver leurs favoris et identifier les personnes qui partagent leurs goûts**. Les films et leurs notes proviennent de TMDB. Les comptes, profils et favoris sont enregistrés dans Firebase.
 
 L’application propose une interface adaptée au téléphone, à la tablette et à l’ordinateur, avec des thèmes sombre, clair et système.
+
+---
 
 ## Sommaire
 
@@ -17,6 +23,8 @@ L’application propose une interface adaptée au téléphone, à la tablette et
 - [Installation et configuration](#installation-et-configuration)
 - [Structure technique et déploiement](#structure-technique-et-déploiement)
 
+---
+
 ## Premiers pas
 
 1. **Créer un compte** depuis **Sign Up**, avec prénom, nom, âge, email et mot de passe, ou choisir Google.
@@ -26,6 +34,8 @@ L’application propose une interface adaptée au téléphone, à la tablette et
 5. **Ouvrir Matching** après avoir ajouté au moins trois films distincts. Les personnes compatibles apparaissent si elles remplissent également les conditions du matching.
 
 L’inscription par email crée directement un compte utilisateur actif avec les informations saisies. Les connexions suivantes s’effectuent depuis **Sign In** ou Google.
+
+---
 
 ## Les écrans de l’application
 
@@ -51,6 +61,8 @@ Les cœurs de **Home** et la page **Favorites** partagent la même collection, s
 
 Une collection vide propose **Discover Movies**. Lorsqu’une opération est en cours, le cœur concerné est temporairement désactivé. En cas d’échec, un message explique le problème ; les boutons **Retry Favorites** permettent de relancer le chargement.
 
+---
+
 ## Les rôles et les statuts
 
 Le **rôle** détermine les fonctionnalités disponibles. Le **statut** indique si le compte est autorisé à les utiliser.
@@ -68,6 +80,8 @@ Toute inscription crée un **USER**. Le rôle **ADMIN** doit être attribué par
 | **DISABLED** | L’application affiche **Account disabled** et la déconnexion, sans les onglets protégés. |
 
 Le tableau de bord affiche les nombres de comptes `USER` au total, actifs et désactivés. Une activation/désactivation demande confirmation. Désactiver un compte bloque son accès et retire son profil de matching ; cette action ne supprime pas ses favoris. L’administrateur peut ensuite le réactiver.
+
+---
 
 ## Comprendre le matching
 
@@ -99,6 +113,8 @@ Les correspondances évoluent avec les favoris et les profils synchronisés. **R
 
 Pour les grandes collections, le calcul utilise au maximum **500 films distincts par personne**, sélectionnés par identifiant croissant. La note TMDB, l’âge et la photo n’interviennent pas dans le score.
 
+---
+
 ## Profil, sécurité et apparence
 
 ### Informations et photo
@@ -119,6 +135,8 @@ Depuis **Profile**, **Edit profile** permet de modifier le prénom, le nom et l�
 
 Le bouton soleil/lune de l’en-tête bascule entre **clair** et **sombre**. **Profile → Appearance** propose aussi **System**, qui suit le réglage de l’appareil. Le thème initial est sombre et la préférence est conservée dans le navigateur ou l’appareil utilisé.
 
+---
+
 ## Questions fréquentes
 
 | Question | Explication ou action |
@@ -132,6 +150,8 @@ Le bouton soleil/lune de l’en-tête bascule entre **clair** et **sombre**. **P
 | Une photo ne s’envoie pas ? | Vérifiez la connexion, le format et la taille. Le responsable du déploiement doit aussi vérifier Cloudinary et les autorisations caméra/galerie. |
 
 Une connexion Internet est nécessaire pour accéder aux services Firebase, TMDB et Cloudinary.
+
+---
 
 ## Installation et configuration
 
@@ -180,6 +200,8 @@ Démarrez avec **`npm run dev`** et ouvrez l’adresse affichée par Vite. Redé
 | `npm run preview` | Prévisualisation locale du build, après compilation. |
 | `npm run lint` | Vérification du code avec ESLint. |
 
+---
+
 ## Structure technique et déploiement
 
 **Technologies** : React 19, TypeScript, Ionic React 9, Vite 8, Capacitor 8, Firebase Authentication/Firestore, TMDB et Cloudinary.
@@ -207,5 +229,7 @@ Les cartes de matching masquent l’email à l’affichage ; le document de matc
 **Déploiement Web** : lancez `npm run build`, publiez `dist/` et configurez le serveur pour servir `index.html` sur les routes de l’application, notamment `/tabs/...`. Autorisez le domaine publié dans Firebase Authentication.
 
 **Android/iOS** : les projets natifs ne sont pas inclus. Personnalisez `appId` et `appName` dans [`capacitor.config.ts`](capacitor.config.ts), installez `@capacitor/android@8` ou `@capacitor/ios@8`, puis ajoutez la plateforme avec `npx cap add android` ou `npx cap add ios`. Compilez avec `npm run build` et synchronisez avec `npx cap sync`. Android nécessite Android Studio ; iOS nécessite Xcode sur macOS. Vérifiez les autorisations caméra/galerie sur la plateforme ciblée.
+
+---
 
 Les données cinéma sont fournies par [The Movie Database](https://www.themoviedb.org/). Ce produit utilise l’API TMDB et n’est ni approuvé ni certifié par TMDB.
